@@ -27,6 +27,7 @@ use std::io::Write;
 /// }
 ///
 /// ```
+#[derive(Copy, Clone, Debug)]
 pub struct Ignore {}
 
 // Everything is marked #[inline] in the hope that the compiler will just delete everything.
@@ -93,5 +94,11 @@ impl Seek for Ignore {
     #[inline]
     fn seek(&mut self, _pos: SeekFrom) -> io::Result<u64> {
         Ok(0)
+    }
+}
+
+impl Default for Ignore {
+    fn default() -> Self {
+        Ignore::new()
     }
 }
