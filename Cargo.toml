@@ -1,0 +1,10 @@
+[package]
+name = "iowrap"
+version = "0.1.0"
+authors = ["Chris West (Faux) <git@goeswhere.com>"]
+
+description = "Small helpers for using io::Read/io::Write"
+repository = "https://github.com/FauxFaux/iowrap-rs"
+readme = "README.md"
+categories = ["data-structures"]
+license = "MIT"
