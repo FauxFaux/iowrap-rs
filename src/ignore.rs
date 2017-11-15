@@ -1,6 +1,7 @@
 use std::fmt;
 
 use std::io;
+use std::io::BufRead;
 use std::io::Read;
 use std::io::Seek;
 use std::io::SeekFrom;
@@ -28,7 +29,10 @@ use std::io::Write;
 /// ```
 pub struct Ignore {}
 
+// Everything is marked #[inline] in the hope that the compiler will just delete everything.
+
 impl Ignore {
+    #[inline]
     pub fn new() -> Self {
         Ignore {}
     }
@@ -73,6 +77,16 @@ impl Read for Ignore {
             ))
         }
     }
+}
+
+impl BufRead for Ignore {
+    #[inline]
+    fn fill_buf(&mut self) -> io::Result<&[u8]> {
+        Ok(&[])
+    }
+
+    #[inline]
+    fn consume(&mut self, _amt: usize) {}
 }
 
 impl Seek for Ignore {
