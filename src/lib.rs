@@ -1,3 +1,5 @@
+//! Some utility methods for wrapping `std::io::Read` and `std::io::Write`.
+
 mod eof;
 mod pos;
 

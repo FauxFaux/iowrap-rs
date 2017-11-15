@@ -1,6 +1,11 @@
 use std::io;
 use std::io::Read;
 
+/// Track how many bytes have been read from a stream.
+///
+/// This may not line up with the position in the file in case of IO errors,
+/// this can't be done through the Read interface. The `position()` returned will
+/// be just before the error, if inspected immediately after the first error.
 pub struct Pos<R: Read> {
     inner: R,
     position: u64,
@@ -11,6 +16,7 @@ impl<R: Read> Pos<R> {
         Pos { inner, position: 0 }
     }
 
+    /// The number of bytes successfully read from the stream.
     pub fn position(&self) -> u64 {
         self.position
     }
