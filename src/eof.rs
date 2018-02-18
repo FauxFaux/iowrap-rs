@@ -78,7 +78,6 @@ impl<R: Read> Eof<R> {
     }
 }
 
-
 impl<R: Read> Read for Eof<R> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         if buf.is_empty() {

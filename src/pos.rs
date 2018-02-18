@@ -4,7 +4,7 @@ use std::io::Read;
 /// Track how many bytes have been read from a stream.
 ///
 /// This may not line up with the position in the file in case of IO errors,
-/// this can't be done through the Read interface. The `position()` returned will
+/// this can't be done through the `Read` interface. The `position()` returned will
 /// be just before the error, if inspected immediately after the first error.
 pub struct Pos<R: Read> {
     inner: R,
