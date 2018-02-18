@@ -13,6 +13,7 @@ use std::io::Read;
 /// # Example
 ///
 /// ```rust
+/// # use std::io;
 /// # use std::io::Read;
 /// let mut naughty = iowrap::ShortRead::new(
 ///         io::Cursor::new(b"1234567890"),
