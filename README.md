@@ -1,6 +1,7 @@
 ## iowrap
 
 [![](https://img.shields.io/crates/v/iowrap.svg)](https://crates.io/crates/iowrap)
+[![](https://travis-ci.org/FauxFaux/iowrap-rs.svg)](https://travis-ci.org/FauxFaux/iowrap-rs)
 
 A couple of utilities that I have ended up wanting in various projects,
 around `std::io::Read` streams.
@@ -10,6 +11,10 @@ around `std::io::Read` streams.
  * `ReadMany` adds a `read_many` to `Read`, like `read_exact` but with defined EoF behaviour
  * `Ignore` implements `Read` and `Write` and `Seek` and.. and does nothing.
  * `ShortRead` is an intentionally, controllably naughty `Read` for testing.
+
+## Documentation
+
+Please read the [iowrap documentation on docs.rs](https://docs.rs/iowrap/).
 
 ## License
 

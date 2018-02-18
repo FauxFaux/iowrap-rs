@@ -8,3 +8,6 @@ repository = "https://github.com/FauxFaux/iowrap-rs"
 readme = "README.md"
 categories = ["data-structures"]
 license = "MIT"
+
+[badges.travis-ci]
+repository = "FauxFaux/iowrap-rs"
