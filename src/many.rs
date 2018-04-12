@@ -44,9 +44,9 @@ impl<T: Read> ReadMany for T {
 
 #[cfg(test)]
 mod tests {
-    use std::io;
     use many::ReadMany;
     use short::ShortRead;
+    use std::io;
 
     #[test]
     fn short_read() {

@@ -40,9 +40,9 @@ impl<R: Read> Read for Pos<R> {
 
 #[cfg(test)]
 mod tests {
+    use super::Pos;
     use std::io;
     use std::io::Read;
-    use super::Pos;
 
     #[test]
     fn smoke_cursor() {

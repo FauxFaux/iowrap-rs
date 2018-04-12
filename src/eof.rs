@@ -96,9 +96,9 @@ impl<R: Read> Read for Eof<R> {
 
 #[cfg(test)]
 mod tests {
+    use super::Eof;
     use std::io;
     use std::io::Read;
-    use super::Eof;
 
     #[test]
     fn smoke_cursor() {

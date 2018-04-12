@@ -54,9 +54,9 @@ impl<R: Read, I: Iterator<Item = usize>> ShortRead<R, I> {
 
 #[cfg(test)]
 mod tests {
+    use short::ShortRead;
     use std::io;
     use std::io::Read;
-    use short::ShortRead;
 
     #[test]
     fn shorten() {
