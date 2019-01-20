@@ -5,6 +5,11 @@ use std::io::Read;
 ///
 /// This allows slightly nicer code when reading lots of items using an uncooperative api,
 /// or when you want an `UnexpectedEof` only after the first byte.
+/// It also simplifies determining the last chunk when processing
+/// input in fixed-size chunks.
+///
+/// `Eof::eof()` and – for consistency – the `Read` implementation of `Eof`
+/// ignore `ErrorKind::Interrupted` errors and retry the operation.
 ///
 /// # Example
 ///
@@ -50,13 +55,17 @@ impl<R: Read> Eof<R> {
         }
 
         let mut buf = [0u8; 1];
-        Ok(match self.inner.read(&mut buf)? {
-            0 => true,
-            1 => {
-                self.next = Some(buf[0]);
-                false
+        Ok(loop {
+            break match self.inner.read(&mut buf) {
+                Ok(0) => true,
+                Ok(1) => {
+                    self.next = Some(buf[0]);
+                    false
+                }
+                Ok(_) => unreachable!(),
+                Err(ref e) if e.kind() == io::ErrorKind::Interrupted => continue,
+                Err(e) => return Err(e),
             }
-            _ => unreachable!(),
         })
     }
 
@@ -79,6 +88,8 @@ impl<R: Read> Eof<R> {
 }
 
 impl<R: Read> Read for Eof<R> {
+    /// For consistency with `eof()`, this implementation retries the
+    /// operation on `ErrorKind::Interrupted` errors.
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         if buf.is_empty() {
             return Ok(0);
@@ -90,13 +101,19 @@ impl<R: Read> Read for Eof<R> {
             return Ok(1);
         }
 
-        self.inner.read(buf)
+        loop {
+            match self.inner.read(buf) {
+                Err(ref e) if e.kind() == io::ErrorKind::Interrupted => continue,
+                e => return e,
+            }
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::Eof;
+    use short::ShortRead;
     use std::io;
     use std::io::Read;
 
@@ -158,5 +175,31 @@ mod tests {
             eof.eof().unwrap(),
             "if the underlying reader starts returning data again, so do we"
         );
+    }
+
+    #[test]
+    fn interrupted_read() {
+        let take_a_break = ShortRead::new(
+            io::Cursor::new(b"12345"),
+            vec![0, 1, 0, 1, 0, 0, 0, 9, 9, 0, 1].into_iter(),
+        );
+        let mut eof = Eof::new(take_a_break);
+
+        let mut buf = [0u8; 2];
+
+        assert_eq!(false, eof.eof().unwrap(), "skip interruption at the beginning");
+        assert_eq!(1, eof.read(&mut buf).unwrap());
+        assert_eq!(b'1', buf[0]);
+
+        assert_eq!(1, eof.read(&mut buf).unwrap(), "skip interruption while reading");
+        assert_eq!(b'2', buf[0]);
+
+        assert_eq!(false, eof.eof().unwrap(), "skip multiple interruptions");
+        assert_eq!(1, eof.read(&mut buf).unwrap());
+        assert_eq!(b'3', buf[0]);
+        assert_eq!(2, eof.read(&mut buf).unwrap());
+        assert_eq!(b"45", &buf);
+
+        assert_eq!(true, eof.eof().unwrap(), "skip interruption before eof");
     }
 }
