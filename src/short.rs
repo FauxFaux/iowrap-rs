@@ -4,13 +4,16 @@ use std::io::Read;
 /// Intentionally return short reads, to test `Read` code.
 ///
 /// The `decider` iterator gets to decide how short a read should be.
+/// A read length of 0 generates an `ErrorKind::Interrupted` error.
+/// When the iterator runs out before the reader, `read` will always
+/// return zero-length reads (EOF).
+///
 /// Currently, no effort is made to make reads longer, if the underlying
 /// reader naturally returns short reads.
 ///
-/// It's expected that the sum of the iterator is longer than the reader:
-/// the behaviour otherwise hasn't yet been decided.
+/// # Examples
 ///
-/// # Example
+/// Short read:
 ///
 /// ```rust
 /// # use std::io;
@@ -24,6 +27,20 @@ use std::io::Read;
 /// // but we've limited it to two bytes.
 /// assert_eq!(2, naughty.read(&mut buf).unwrap());
 /// ```
+///
+/// Interrupted read:
+///
+/// ```rust
+/// # use std::io;
+/// # use std::io::Read;
+/// let mut interrupting = iowrap::ShortRead::new(
+///         io::Cursor::new(b"123"),
+///         vec![0, 1, 0].into_iter()
+/// );
+/// let mut buf = [0u8; 10];
+/// assert_eq!(io::ErrorKind::Interrupted,
+///         interrupting.read(&mut buf).unwrap_err().kind());
+/// ```
 pub struct ShortRead<R: Read, I: Iterator<Item = usize>> {
     inner: R,
     decider: I,
@@ -32,6 +49,7 @@ pub struct ShortRead<R: Read, I: Iterator<Item = usize>> {
 impl<R: Read, I: Iterator<Item = usize>> Read for ShortRead<R, I> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         let wanted = match self.decider.next() {
+            Some(0) => return Err(io::Error::from(io::ErrorKind::Interrupted)),
             Some(wanted) => wanted,
             None => return Ok(0),
         };
@@ -76,5 +94,21 @@ mod tests {
 
         assert_eq!(0, naughty.read(&mut buf).unwrap());
         assert_eq!(0, naughty.read(&mut buf).unwrap());
+    }
+
+    #[test]
+    fn interrupt() {
+        let mut interrupting = ShortRead::new(
+            io::Cursor::new(b"12"),
+            vec![0, 1, 0, 1].into_iter(),
+        );
+        let mut buf = [0; 1];
+
+        assert_eq!(io::ErrorKind::Interrupted,
+            interrupting.read(&mut buf).unwrap_err().kind());
+        assert_eq!(1, interrupting.read(&mut buf).unwrap());
+        assert_eq!(io::ErrorKind::Interrupted,
+            interrupting.read(&mut buf).unwrap_err().kind());
+        assert_eq!(1, interrupting.read(&mut buf).unwrap());
     }
 }
