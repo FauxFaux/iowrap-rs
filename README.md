@@ -18,4 +18,4 @@ Please read the [iowrap documentation on docs.rs](https://docs.rs/iowrap/).
 
 ## License
 
-Don't care. It's listed as `MIT` but do tell me if that's inconvenient.
+`MIT or Apache 2.0`.

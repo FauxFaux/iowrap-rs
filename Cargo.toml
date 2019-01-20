@@ -7,7 +7,7 @@ description = "Small helpers for using io::Read/io::Write"
 repository = "https://github.com/FauxFaux/iowrap-rs"
 readme = "README.md"
 categories = ["data-structures"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 
 [badges.travis-ci]
 repository = "FauxFaux/iowrap-rs"
