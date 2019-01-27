@@ -23,7 +23,7 @@ pub trait VarBufRead {
             return Ok(ret);
         }
 
-        Err(io::ErrorKind::UnexpectedEof.into())
+        Err(io::ErrorKind::NotFound.into())
     }
 }
 
@@ -83,6 +83,7 @@ impl<R: Read> Read for VarBufReader<R> {
 
 #[cfg(test)]
 mod tests {
+    use std::io;
     use std::io::Cursor;
     use std::io::Read;
 
@@ -94,7 +95,7 @@ mod tests {
     use super::VarBufReader;
 
     #[test]
-    fn fill_many() {
+    fn fill_then_read() {
         let mut vb = VarBufReader::new(ShortRead::new(
             Cursor::new(b"hello"),
             vec![1, 1, 2, 1, 99].into_iter(),
@@ -104,5 +105,90 @@ mod tests {
         let mut buf = [0u8; 4];
         assert_eq!(4, vb.read(&mut buf).unwrap());
         assert_eq!(b"ello", &buf);
+    }
+
+    #[test]
+    fn read_then_fill() {
+        let mut vb = VarBufReader::new(ShortRead::new(
+            Cursor::new(b"hello world"),
+            vec![1, 1, 2, 1, 99].into_iter(),
+        ));
+        assert_eq!(b'h', vb.read_u8().unwrap());
+        assert_eq!(b"ell", &vb.fill_many(5).unwrap()[..3]);
+        assert_eq!(b'e', vb.read_u8().unwrap());
+        vb.consume("llo ".len());
+        assert_eq!(b"world", &vb.fill_many(7).unwrap());
+    }
+
+    #[test]
+    fn double_fill() {
+        let mut vb = VarBufReader::new(ShortRead::new(
+            Cursor::new(b"hello world"),
+            vec![1, 1, 2, 1, 99].into_iter(),
+        ));
+        assert_eq!(b"he", &vb.fill_many(2).unwrap()[..2]);
+        assert_eq!(b"hell", &vb.fill_many(4).unwrap()[..4]);
+        vb.consume(3);
+        assert_eq!(b"lo", &vb.fill_many(2).unwrap()[..2]);
+        assert_eq!(b'l', vb.read_u8().unwrap());
+        assert_eq!(b'o', vb.read_u8().unwrap());
+    }
+
+    #[test]
+    fn eof() {
+        let mut vb = VarBufReader::new(ShortRead::new(
+            Cursor::new(b"hello world"),
+            vec![1, 1, 2, 1, 99].into_iter(),
+        ));
+        assert_eq!(b"hello world", &vb.fill_many(100).unwrap());
+
+        vb.consume("hello wor".len());
+        assert_eq!(b"ld", &vb.fill_many(100).unwrap());
+        assert_eq!(b"ld", &vb.fill_at_least(2).unwrap());
+        assert_eq!(
+            io::ErrorKind::UnexpectedEof,
+            vb.fill_at_least(3).unwrap_err().kind()
+        );
+
+        vb.consume(1);
+        assert_eq!(b"d", &vb.fill_at_least(1).unwrap());
+        assert_eq!(
+            io::ErrorKind::UnexpectedEof,
+            vb.fill_at_least(2).unwrap_err().kind()
+        );
+
+        vb.consume(1);
+        assert_eq!(b"", &vb.fill_many(1).unwrap());
+        assert_eq!(
+            io::ErrorKind::UnexpectedEof,
+            vb.fill_at_least(1).unwrap_err().kind()
+        );
+    }
+
+    #[test]
+    fn read_short() {
+        let mut vb = VarBufReader::new(ShortRead::new(
+            Cursor::new(b"hello there world"),
+            vec![1, 1, 2, 1, 99].into_iter(),
+        ));
+        assert_eq!(
+            io::ErrorKind::NotFound,
+            vb.read_until_limit(b' ', 3).unwrap_err().kind()
+        );
+        assert_eq!(
+            io::ErrorKind::NotFound,
+            vb.read_until_limit(b' ', 4).unwrap_err().kind()
+        );
+        assert_eq!(
+            io::ErrorKind::NotFound,
+            vb.read_until_limit(b' ', 5).unwrap_err().kind()
+        );
+        assert_eq!(b"hello", vb.read_until_limit(b' ', 6).unwrap().as_slice());
+        assert_eq!(b"there", vb.read_until_limit(b' ', 6).unwrap().as_slice());
+        assert_eq!(
+            io::ErrorKind::NotFound,
+            vb.read_until_limit(b' ', 200).unwrap_err().kind()
+        );
+        assert_eq!(b"world", &vb.fill_many(5).unwrap()[..5]);
     }
 }
