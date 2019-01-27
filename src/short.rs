@@ -98,17 +98,18 @@ mod tests {
 
     #[test]
     fn interrupt() {
-        let mut interrupting = ShortRead::new(
-            io::Cursor::new(b"12"),
-            vec![0, 1, 0, 1].into_iter(),
-        );
+        let mut interrupting = ShortRead::new(io::Cursor::new(b"12"), vec![0, 1, 0, 1].into_iter());
         let mut buf = [0; 1];
 
-        assert_eq!(io::ErrorKind::Interrupted,
-            interrupting.read(&mut buf).unwrap_err().kind());
+        assert_eq!(
+            io::ErrorKind::Interrupted,
+            interrupting.read(&mut buf).unwrap_err().kind()
+        );
         assert_eq!(1, interrupting.read(&mut buf).unwrap());
-        assert_eq!(io::ErrorKind::Interrupted,
-            interrupting.read(&mut buf).unwrap_err().kind());
+        assert_eq!(
+            io::ErrorKind::Interrupted,
+            interrupting.read(&mut buf).unwrap_err().kind()
+        );
         assert_eq!(1, interrupting.read(&mut buf).unwrap());
     }
 }

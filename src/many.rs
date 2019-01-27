@@ -30,7 +30,7 @@ impl<T: Read> ReadMany for T {
             match self.read(&mut buf[pos..]) {
                 Ok(0) => break,
                 Ok(read) => pos += read,
-                Err(ref e) if e.kind() == io::ErrorKind::Interrupted => {},
+                Err(ref e) if e.kind() == io::ErrorKind::Interrupted => {}
                 Err(e) => return Err(e),
             }
         }
@@ -60,10 +60,7 @@ mod tests {
 
     #[test]
     fn interrupted_read() {
-        let mut take_a_break = ShortRead::new(
-            io::Cursor::new(b"12345"),
-            vec![2, 0, 3].into_iter(),
-        );
+        let mut take_a_break = ShortRead::new(io::Cursor::new(b"12345"), vec![2, 0, 3].into_iter());
         let mut buf = [0u8; 5];
         assert_eq!(5, take_a_break.read_many(&mut buf).unwrap());
         assert_eq!(b"12345", &buf);

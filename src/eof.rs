@@ -65,7 +65,7 @@ impl<R: Read> Eof<R> {
                 Ok(_) => unreachable!(),
                 Err(ref e) if e.kind() == io::ErrorKind::Interrupted => continue,
                 Err(e) => return Err(e),
-            }
+            };
         })
     }
 
@@ -187,11 +187,19 @@ mod tests {
 
         let mut buf = [0u8; 2];
 
-        assert_eq!(false, eof.eof().unwrap(), "skip interruption at the beginning");
+        assert_eq!(
+            false,
+            eof.eof().unwrap(),
+            "skip interruption at the beginning"
+        );
         assert_eq!(1, eof.read(&mut buf).unwrap());
         assert_eq!(b'1', buf[0]);
 
-        assert_eq!(1, eof.read(&mut buf).unwrap(), "skip interruption while reading");
+        assert_eq!(
+            1,
+            eof.read(&mut buf).unwrap(),
+            "skip interruption while reading"
+        );
         assert_eq!(b'2', buf[0]);
 
         assert_eq!(false, eof.eof().unwrap(), "skip multiple interruptions");
