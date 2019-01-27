@@ -41,8 +41,8 @@ impl<T: Read> ReadMany for T {
 
 #[cfg(test)]
 mod tests {
-    use many::ReadMany;
-    use short::ShortRead;
+    use crate::many::ReadMany;
+    use crate::short::ShortRead;
     use std::io;
 
     #[test]

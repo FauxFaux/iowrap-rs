@@ -113,7 +113,7 @@ impl<R: Read> Read for Eof<R> {
 #[cfg(test)]
 mod tests {
     use super::Eof;
-    use short::ShortRead;
+    use crate::short::ShortRead;
     use std::io;
     use std::io::Read;
 

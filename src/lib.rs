@@ -6,8 +6,8 @@ mod many;
 mod pos;
 mod short;
 
-pub use eof::Eof;
-pub use ignore::Ignore;
-pub use many::ReadMany;
-pub use pos::Pos;
-pub use short::ShortRead;
+pub use crate::eof::Eof;
+pub use crate::ignore::Ignore;
+pub use crate::many::ReadMany;
+pub use crate::pos::Pos;
+pub use crate::short::ShortRead;

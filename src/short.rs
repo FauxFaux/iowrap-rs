@@ -72,7 +72,7 @@ impl<R: Read, I: Iterator<Item = usize>> ShortRead<R, I> {
 
 #[cfg(test)]
 mod tests {
-    use short::ShortRead;
+    use crate::short::ShortRead;
     use std::io;
     use std::io::Read;
 
