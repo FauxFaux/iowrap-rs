@@ -13,3 +13,9 @@ edition = "2018"
 
 [badges.travis-ci]
 repository = "FauxFaux/iowrap-rs"
+
+[dependencies]
+memchr = "2"
+
+[dev-dependencies]
+byteorder = "1"
