@@ -5,6 +5,7 @@ mod ignore;
 mod many;
 mod pos;
 mod short;
+#[cfg(test)]
 mod var_buf;
 
 pub use crate::eof::Eof;
@@ -12,5 +13,5 @@ pub use crate::ignore::Ignore;
 pub use crate::many::ReadMany;
 pub use crate::pos::Pos;
 pub use crate::short::ShortRead;
-pub use crate::var_buf::VarBufRead;
-pub use crate::var_buf::VarBufReader;
+#[cfg(test)]
+pub use crate::var_buf::{VarBufRead, VarBufReader};

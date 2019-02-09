@@ -2,11 +2,34 @@ use std::io;
 use std::io::BufRead;
 use std::io::Read;
 
+/// An "extension" of `std::io::BufRead`, for which `fill_*` can be forced to read.
+///
+/// `BufRead`'s `fill_buf` may return only 1 byte, and will not re-fill until you consume.
+///
+/// `fill_many` will try to fill the internal buffer to the `target` requested,
+/// giving up only if the underlying reader hits end-of-file, or returns an error
+///
+/// `fill_at_least` will only return success if the internal buffer contains at least
+/// `target` bytes.
+///
+/// `consume` advances the internal pointer, same as with `BufRead`.
 pub trait VarBufRead {
+    /// Advance the internal pointer, so that `fill_*` and `read*` will no longer return
+    /// the consumed bytes.
     fn consume(&mut self, amt: usize);
 
+    /// Try hard to return a buffer of at least `target` bytes. If the end of file is
+    /// reached, then the buffer will be shorter. If we already have sufficient bytes in
+    /// memory, then no reads will be performed, and the larger buffer will be returned.
+    ///
+    /// Other errors (except interruption) are returned as-is.
     fn fill_many(&mut self, target: usize) -> io::Result<&[u8]>;
 
+    /// Return a buffer of at least `target` bytes, by repeatedly reading from the
+    /// underlying reader. If the underlying reader reaches end-of-file, an error will
+    /// be returned.
+    ///
+    /// Other errors (except interruption) are returned as-is.
     fn fill_at_least(&mut self, target: usize) -> io::Result<&[u8]> {
         let buf = self.fill_many(target)?;
         if buf.len() < target {
@@ -15,6 +38,7 @@ pub trait VarBufRead {
         Ok(buf)
     }
 
+    /// Read
     fn read_until_limit(&mut self, delim: u8, limit: usize) -> Result<Vec<u8>, io::Error> {
         let buf = self.fill_many(limit)?;
         if let Some(end) = memchr::memchr(delim, buf) {
