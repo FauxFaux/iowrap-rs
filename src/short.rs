@@ -112,4 +112,36 @@ mod tests {
         );
         assert_eq!(1, interrupting.read(&mut buf).unwrap());
     }
+
+    #[test]
+    fn std_bufreader_leaves_us_alone() {
+        use std::io::BufRead;
+
+        let mut naughty = io::BufReader::new(ShortRead::new(
+            io::Cursor::new(b"1234567890"),
+            vec![2, 3, 4, 5, 6].into_iter(),
+        ));
+
+        assert_eq!(b"12", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"2", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"345", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"45", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"5", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"6789", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"789", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"89", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"9", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"0", naughty.fill_buf().unwrap());
+        naughty.consume(1);
+        assert_eq!(b"", naughty.fill_buf().unwrap());
+    }
 }
