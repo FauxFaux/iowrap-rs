@@ -1,7 +1,7 @@
 ## iowrap
 
 [![](https://img.shields.io/crates/v/iowrap.svg)](https://crates.io/crates/iowrap)
-[![](https://travis-ci.org/FauxFaux/iowrap-rs.svg)](https://travis-ci.org/FauxFaux/iowrap-rs)
+[![CI](https://github.com/FauxFaux/iowrap-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/FauxFaux/iowrap-rs/actions/workflows/rust.yml)
 
 A couple of utilities that I have ended up wanting in various projects,
 around `std::io::Read` streams.
