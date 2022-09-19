@@ -35,7 +35,7 @@ impl<T: Read> ReadMany for T {
             }
         }
 
-        return Ok(pos);
+        Ok(pos)
     }
 }
 

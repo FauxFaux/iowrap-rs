@@ -19,12 +19,9 @@ use std::io::Write;
 ///
 /// # Example
 /// ```rust
-/// use std::io;
+/// # use std::io;
 /// use iowrap::Ignore;
-///
-/// fn main() {
-///     assert_eq!(0, io::copy(&mut Ignore::new(), &mut Ignore::new()).unwrap());
-/// }
+/// assert_eq!(0, io::copy(&mut Ignore::new(), &mut Ignore::new()).unwrap());
 ///
 /// ```
 #[derive(Copy, Clone, Debug)]
